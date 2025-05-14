@@ -1,0 +1,54 @@
+﻿@page "/cmds/create"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>CMD</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="CMD" OnValidSubmit="AddCMD" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="commandid" class="form-label">CommandId:</label> 
+                <InputText id="commandid" @bind-Value="CMD.CommandId" class="form-control" /> 
+                <ValidationMessage For="() => CMD.CommandId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="cmdtype" class="form-label">CmdType:</label> 
+                <InputText id="cmdtype" @bind-Value="CMD.CmdType" class="form-control" /> 
+                <ValidationMessage For="() => CMD.CmdType" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="batteryid" class="form-label">BatteryId:</label> 
+                <InputNumber id="batteryid" @bind-Value="CMD.BatteryId" class="form-control" /> 
+                <ValidationMessage For="() => CMD.BatteryId" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/cmds">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private CMD CMD { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddCMD()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.CMD.Add(CMD);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/cmds");
+    }
+}

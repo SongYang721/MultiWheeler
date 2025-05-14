@@ -1,0 +1,48 @@
+﻿@page "/batteries/details"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Battery</h2>
+    <hr />
+    @if (battery is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">SN</dt>
+            <dd class="col-sm-10">@battery.SN</dd>
+            <dt class="col-sm-2">CustomerId</dt>
+            <dd class="col-sm-10">@battery.CustomerId</dd>
+        </dl>
+        <div>
+            <a href="@($"/batteries/edit?batteryid={battery.BatteryId}")">Edit</a> |
+            <a href="@($"/batteries")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Battery? battery;
+
+    [SupplyParameterFromQuery]
+    private int BatteryId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        battery = await context.Battery.FirstOrDefaultAsync(m => m.BatteryId == BatteryId);
+
+        if (battery is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

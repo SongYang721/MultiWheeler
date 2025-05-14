@@ -1,0 +1,48 @@
+﻿@page "/batterystatuses"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using MultiWheeler.Domain
+@using MultiWheeler.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="batterystatuses/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.BatteryStatus">
+    <PropertyColumn Property="batterystatus => batterystatus.SN" />
+    <PropertyColumn Property="batterystatus => batterystatus.Timestamp" />
+    <PropertyColumn Property="batterystatus => batterystatus.PackCurr" />
+    <PropertyColumn Property="batterystatus => batterystatus.PackVolt" />
+    <PropertyColumn Property="batterystatus => batterystatus.SOC" />
+    <PropertyColumn Property="batterystatus => batterystatus.SOH" />
+    <PropertyColumn Property="batterystatus => batterystatus.ChargingSta" />
+    <PropertyColumn Property="batterystatus => batterystatus.PackError" />
+    <PropertyColumn Property="batterystatus => batterystatus.MdVolt" />
+    <PropertyColumn Property="batterystatus => batterystatus.MdTemp" />
+    <PropertyColumn Property="batterystatus => batterystatus.MdError" />
+    <PropertyColumn Property="batterystatus => batterystatus.CellVolt" />
+    <PropertyColumn Property="batterystatus => batterystatus.BatteryId" />
+
+    <TemplateColumn Context="batterystatus">
+        <a href="@($"batterystatuses/edit?batterystatusid={batterystatus.BatteryStatusId}")">Edit</a> |
+        <a href="@($"batterystatuses/details?batterystatusid={batterystatus.BatteryStatusId}")">Details</a> |
+        <a href="@($"batterystatuses/delete?batterystatusid={batterystatus.BatteryStatusId}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private MultiWheelerContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

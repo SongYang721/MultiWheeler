@@ -1,0 +1,71 @@
+﻿@page "/cmdresults/delete"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>CMDResult</h2>
+    <hr />
+    @if (cmdresult is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">CommandId</dt>
+            <dd class="col-sm-10">@cmdresult.CommandId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">SN</dt>
+            <dd class="col-sm-10">@cmdresult.SN</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Result</dt>
+            <dd class="col-sm-10">@cmdresult.Result</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Message</dt>
+            <dd class="col-sm-10">@cmdresult.Message</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CMDId</dt>
+            <dd class="col-sm-10">@cmdresult.CMDId</dd>
+        </dl>
+        <EditForm method="post" Model="cmdresult" OnValidSubmit="DeleteCMDResult" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(cmdresult is null)">Delete</button> |
+            <a href="/cmdresults">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private CMDResult? cmdresult;
+
+    [SupplyParameterFromQuery]
+    private int CMDResultId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        cmdresult = await context.CMDResult.FirstOrDefaultAsync(m => m.CMDResultId == CMDResultId);
+
+        if (cmdresult is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteCMDResult()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.CMDResult.Remove(cmdresult!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/cmdresults");
+    }
+}

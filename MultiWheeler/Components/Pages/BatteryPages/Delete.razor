@@ -1,0 +1,59 @@
+﻿@page "/batteries/delete"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Battery</h2>
+    <hr />
+    @if (battery is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">SN</dt>
+            <dd class="col-sm-10">@battery.SN</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CustomerId</dt>
+            <dd class="col-sm-10">@battery.CustomerId</dd>
+        </dl>
+        <EditForm method="post" Model="battery" OnValidSubmit="DeleteBattery" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(battery is null)">Delete</button> |
+            <a href="/batteries">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Battery? battery;
+
+    [SupplyParameterFromQuery]
+    private int BatteryId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        battery = await context.Battery.FirstOrDefaultAsync(m => m.BatteryId == BatteryId);
+
+        if (battery is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteBattery()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Battery.Remove(battery!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/batteries");
+    }
+}

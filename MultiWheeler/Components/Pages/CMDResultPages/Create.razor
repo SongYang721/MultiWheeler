@@ -1,0 +1,64 @@
+﻿@page "/cmdresults/create"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>CMDResult</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="CMDResult" OnValidSubmit="AddCMDResult" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="commandid" class="form-label">CommandId:</label> 
+                <InputText id="commandid" @bind-Value="CMDResult.CommandId" class="form-control" /> 
+                <ValidationMessage For="() => CMDResult.CommandId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="sn" class="form-label">SN:</label> 
+                <InputText id="sn" @bind-Value="CMDResult.SN" class="form-control" /> 
+                <ValidationMessage For="() => CMDResult.SN" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="result" class="form-label">Result:</label> 
+                <InputText id="result" @bind-Value="CMDResult.Result" class="form-control" /> 
+                <ValidationMessage For="() => CMDResult.Result" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="message" class="form-label">Message:</label> 
+                <InputText id="message" @bind-Value="CMDResult.Message" class="form-control" /> 
+                <ValidationMessage For="() => CMDResult.Message" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="cmdid" class="form-label">CMDId:</label> 
+                <InputNumber id="cmdid" @bind-Value="CMDResult.CMDId" class="form-control" /> 
+                <ValidationMessage For="() => CMDResult.CMDId" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/cmdresults">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private CMDResult CMDResult { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddCMDResult()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.CMDResult.Add(CMDResult);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/cmdresults");
+    }
+}

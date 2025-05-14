@@ -1,0 +1,50 @@
+﻿@page "/cmds/details"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>CMD</h2>
+    <hr />
+    @if (cmd is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">CommandId</dt>
+            <dd class="col-sm-10">@cmd.CommandId</dd>
+            <dt class="col-sm-2">CmdType</dt>
+            <dd class="col-sm-10">@cmd.CmdType</dd>
+            <dt class="col-sm-2">BatteryId</dt>
+            <dd class="col-sm-10">@cmd.BatteryId</dd>
+        </dl>
+        <div>
+            <a href="@($"/cmds/edit?cmdid={cmd.CMDId}")">Edit</a> |
+            <a href="@($"/cmds")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private CMD? cmd;
+
+    [SupplyParameterFromQuery]
+    private int CMDId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        cmd = await context.CMD.FirstOrDefaultAsync(m => m.CMDId == CMDId);
+
+        if (cmd is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

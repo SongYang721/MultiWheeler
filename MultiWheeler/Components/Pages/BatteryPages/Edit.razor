@@ -1,0 +1,94 @@
+﻿@page "/batteries/edit"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Battery</h2>
+<hr />
+@if (Battery is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Battery" OnValidSubmit="UpdateBattery" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Battery.BatteryId" value="@Battery.BatteryId" />
+                <div class="mb-3">
+                    <label for="sn" class="form-label">SN:</label>
+                    <InputText id="sn" @bind-Value="Battery.SN" class="form-control" />
+                    <ValidationMessage For="() => Battery.SN" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="customerid" class="form-label">CustomerId:</label>
+                    <InputNumber id="customerid" @bind-Value="Battery.CustomerId" class="form-control" />
+                    <ValidationMessage For="() => Battery.CustomerId" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/batteries">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int BatteryId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Battery? Battery { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Battery ??= await context.Battery.FirstOrDefaultAsync(m => m.BatteryId == BatteryId);
+
+        if (Battery is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateBattery()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Battery!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!BatteryExists(Battery!.BatteryId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/batteries");
+    }
+
+    private bool BatteryExists(int batteryid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Battery.Any(e => e.BatteryId == batteryid);
+    }
+}

@@ -1,0 +1,50 @@
+﻿@page "/reports/details"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Report</h2>
+    <hr />
+    @if (report is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">IssueCategory</dt>
+            <dd class="col-sm-10">@report.IssueCategory</dd>
+            <dt class="col-sm-2">IssueDescription</dt>
+            <dd class="col-sm-10">@report.IssueDescription</dd>
+            <dt class="col-sm-2">CustomerId</dt>
+            <dd class="col-sm-10">@report.CustomerId</dd>
+        </dl>
+        <div>
+            <a href="@($"/reports/edit?reportid={report.ReportId}")">Edit</a> |
+            <a href="@($"/reports")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Report? report;
+
+    [SupplyParameterFromQuery]
+    private int ReportId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        report = await context.Report.FirstOrDefaultAsync(m => m.ReportId == ReportId);
+
+        if (report is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

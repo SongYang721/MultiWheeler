@@ -1,0 +1,109 @@
+﻿@page "/cmdresults/edit"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>CMDResult</h2>
+<hr />
+@if (CMDResult is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="CMDResult" OnValidSubmit="UpdateCMDResult" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="CMDResult.CMDResultId" value="@CMDResult.CMDResultId" />
+                <div class="mb-3">
+                    <label for="commandid" class="form-label">CommandId:</label>
+                    <InputText id="commandid" @bind-Value="CMDResult.CommandId" class="form-control" />
+                    <ValidationMessage For="() => CMDResult.CommandId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="sn" class="form-label">SN:</label>
+                    <InputText id="sn" @bind-Value="CMDResult.SN" class="form-control" />
+                    <ValidationMessage For="() => CMDResult.SN" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="result" class="form-label">Result:</label>
+                    <InputText id="result" @bind-Value="CMDResult.Result" class="form-control" />
+                    <ValidationMessage For="() => CMDResult.Result" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="message" class="form-label">Message:</label>
+                    <InputText id="message" @bind-Value="CMDResult.Message" class="form-control" />
+                    <ValidationMessage For="() => CMDResult.Message" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="cmdid" class="form-label">CMDId:</label>
+                    <InputNumber id="cmdid" @bind-Value="CMDResult.CMDId" class="form-control" />
+                    <ValidationMessage For="() => CMDResult.CMDId" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/cmdresults">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int CMDResultId { get; set; }
+
+    [SupplyParameterFromForm]
+    private CMDResult? CMDResult { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        CMDResult ??= await context.CMDResult.FirstOrDefaultAsync(m => m.CMDResultId == CMDResultId);
+
+        if (CMDResult is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateCMDResult()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(CMDResult!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!CMDResultExists(CMDResult!.CMDResultId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/cmdresults");
+    }
+
+    private bool CMDResultExists(int cmdresultid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.CMDResult.Any(e => e.CMDResultId == cmdresultid);
+    }
+}

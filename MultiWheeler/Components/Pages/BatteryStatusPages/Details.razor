@@ -1,0 +1,70 @@
+﻿@page "/batterystatuses/details"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>BatteryStatus</h2>
+    <hr />
+    @if (batterystatus is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">SN</dt>
+            <dd class="col-sm-10">@batterystatus.SN</dd>
+            <dt class="col-sm-2">Timestamp</dt>
+            <dd class="col-sm-10">@batterystatus.Timestamp</dd>
+            <dt class="col-sm-2">PackCurr</dt>
+            <dd class="col-sm-10">@batterystatus.PackCurr</dd>
+            <dt class="col-sm-2">PackVolt</dt>
+            <dd class="col-sm-10">@batterystatus.PackVolt</dd>
+            <dt class="col-sm-2">SOC</dt>
+            <dd class="col-sm-10">@batterystatus.SOC</dd>
+            <dt class="col-sm-2">SOH</dt>
+            <dd class="col-sm-10">@batterystatus.SOH</dd>
+            <dt class="col-sm-2">ChargingSta</dt>
+            <dd class="col-sm-10">@batterystatus.ChargingSta</dd>
+            <dt class="col-sm-2">PackError</dt>
+            <dd class="col-sm-10">@batterystatus.PackError</dd>
+            <dt class="col-sm-2">MdVolt</dt>
+            <dd class="col-sm-10">@batterystatus.MdVolt</dd>
+            <dt class="col-sm-2">MdTemp</dt>
+            <dd class="col-sm-10">@batterystatus.MdTemp</dd>
+            <dt class="col-sm-2">MdError</dt>
+            <dd class="col-sm-10">@batterystatus.MdError</dd>
+            <dt class="col-sm-2">CellVolt</dt>
+            <dd class="col-sm-10">@batterystatus.CellVolt</dd>
+            <dt class="col-sm-2">BatteryId</dt>
+            <dd class="col-sm-10">@batterystatus.BatteryId</dd>
+        </dl>
+        <div>
+            <a href="@($"/batterystatuses/edit?batterystatusid={batterystatus.BatteryStatusId}")">Edit</a> |
+            <a href="@($"/batterystatuses")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private BatteryStatus? batterystatus;
+
+    [SupplyParameterFromQuery]
+    private int BatteryStatusId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        batterystatus = await context.BatteryStatus.FirstOrDefaultAsync(m => m.BatteryStatusId == BatteryStatusId);
+
+        if (batterystatus is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

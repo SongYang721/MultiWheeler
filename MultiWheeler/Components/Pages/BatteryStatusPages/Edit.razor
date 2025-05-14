@@ -1,0 +1,149 @@
+﻿@page "/batterystatuses/edit"
+@using Microsoft.EntityFrameworkCore
+@using MultiWheeler.Domain
+@inject IDbContextFactory<MultiWheeler.Data.MultiWheelerContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>BatteryStatus</h2>
+<hr />
+@if (BatteryStatus is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="BatteryStatus" OnValidSubmit="UpdateBatteryStatus" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="BatteryStatus.BatteryStatusId" value="@BatteryStatus.BatteryStatusId" />
+                <div class="mb-3">
+                    <label for="sn" class="form-label">SN:</label>
+                    <InputText id="sn" @bind-Value="BatteryStatus.SN" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => BatteryStatus.SN" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="timestamp" class="form-label">Timestamp:</label>
+                    <InputText id="timestamp" @bind-Value="BatteryStatus.Timestamp" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.Timestamp" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="packcurr" class="form-label">PackCurr:</label>
+                    <InputNumber id="packcurr" @bind-Value="BatteryStatus.PackCurr" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.PackCurr" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="packvolt" class="form-label">PackVolt:</label>
+                    <InputNumber id="packvolt" @bind-Value="BatteryStatus.PackVolt" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.PackVolt" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="soc" class="form-label">SOC:</label>
+                    <InputNumber id="soc" @bind-Value="BatteryStatus.SOC" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.SOC" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="soh" class="form-label">SOH:</label>
+                    <InputNumber id="soh" @bind-Value="BatteryStatus.SOH" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.SOH" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="chargingsta" class="form-label">ChargingSta:</label>
+                    <InputNumber id="chargingsta" @bind-Value="BatteryStatus.ChargingSta" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.ChargingSta" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="packerror" class="form-label">PackError:</label>
+                    <InputNumber id="packerror" @bind-Value="BatteryStatus.PackError" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.PackError" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="mdvolt" class="form-label">MdVolt:</label>
+                    <InputText id="mdvolt" @bind-Value="BatteryStatus.MdVolt" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.MdVolt" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="mdtemp" class="form-label">MdTemp:</label>
+                    <InputText id="mdtemp" @bind-Value="BatteryStatus.MdTemp" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.MdTemp" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="mderror" class="form-label">MdError:</label>
+                    <InputNumber id="mderror" @bind-Value="BatteryStatus.MdError" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.MdError" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="cellvolt" class="form-label">CellVolt:</label>
+                    <InputText id="cellvolt" @bind-Value="BatteryStatus.CellVolt" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.CellVolt" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="batteryid" class="form-label">BatteryId:</label>
+                    <InputNumber id="batteryid" @bind-Value="BatteryStatus.BatteryId" class="form-control" />
+                    <ValidationMessage For="() => BatteryStatus.BatteryId" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/batterystatuses">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int BatteryStatusId { get; set; }
+
+    [SupplyParameterFromForm]
+    private BatteryStatus? BatteryStatus { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        BatteryStatus ??= await context.BatteryStatus.FirstOrDefaultAsync(m => m.BatteryStatusId == BatteryStatusId);
+
+        if (BatteryStatus is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateBatteryStatus()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(BatteryStatus!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!BatteryStatusExists(BatteryStatus!.BatteryStatusId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/batterystatuses");
+    }
+
+    private bool BatteryStatusExists(int batterystatusid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.BatteryStatus.Any(e => e.BatteryStatusId == batterystatusid);
+    }
+}
